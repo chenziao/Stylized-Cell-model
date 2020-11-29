@@ -30,9 +30,9 @@ class Stylized_Cell(object):
     def setup_all(self):
         if self.geometry is not None:
             self.set_morphology()
-            self.calc_seg_coords()
             self.set_channels()
-#             self.init_v()  # set initial voltage
+#             self.calc_seg_coords()
+#             self.init_v()
     
     def set_geometry(self,geometry):
         if geometry is None:
@@ -114,7 +114,7 @@ class Stylized_Cell(object):
         p0 = np.empty((self._nseg,3))
         p1 = np.empty((self._nseg,3))
         p05 = np.empty((self._nseg,3))
-        d = np.empty(self._nseg)
+        r = np.empty(self._nseg)
         for isec,sec in enumerate(self.all):
             iseg = self.sec_id_in_seg[isec]
             nseg = sec.nseg
@@ -124,11 +124,11 @@ class Stylized_Cell(object):
             p0[iseg:iseg+nseg,:] = pts[:-2:2,:]
             p1[iseg:iseg+nseg,:] = pts[2::2,:]
             p05[iseg:iseg+nseg,:] = pts[1:-1:2,:]
-            d[iseg:iseg+nseg] = sec.diam
+            r[iseg:iseg+nseg] = sec.diam/2
         self.seg_coords = {}
         self.seg_coords['dl'] = p1-p0  # length direction vector
         self.seg_coords['pc'] = p05  # center coordinates
-        self.seg_coords['d'] = d  # diameter
+        self.seg_coords['r'] = r  # radius
     
     def get_sec_by_id(self,index=None):
         """Get list of section objects by indices in the section list"""
