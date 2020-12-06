@@ -155,8 +155,3 @@ class Stylized_Cell(object):
     def add_injection(self,sec_index,**kwargs):
         """Add current injection to a section by its index"""
         self.injection.append(Current_injection(self,sec_index,**kwargs))
-    
-    def init_v(self):
-        """Set all segments initial voltage to vrest"""
-        for seg in self.segments:
-            seg.v = self._vrest
