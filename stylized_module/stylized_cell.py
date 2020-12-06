@@ -31,8 +31,6 @@ class Stylized_Cell(object):
         if self.geometry is not None:
             self.set_morphology()
             self.set_channels()
-#             self.calc_seg_coords()
-#             self.init_v()
     
     def set_geometry(self,geometry):
         if geometry is None:
@@ -154,29 +152,11 @@ class Stylized_Cell(object):
             sec.g_pas = gl
             sec.e_pas = self._vrest
     
-    def set_soma_hh(self,gl_dend=0.0003,**soma_param):
-        """A use case of 'set_channels', set all sections passive but soma with HH channels"""
-        for sec in self.all:
-            sec.cm = 1.0
-        self.soma.insert('hh')
-        self.soma.el_hh = self._vrest
-        for param,value in soma_param.items():
-            setattr(self.soma,param+'_hh',value)
-        for sec in self.all[1:]:
-            sec.insert('pas')
-            sec.g_pas = gl_dend
-            sec.e_pas = self._vrest
-    
     def add_injection(self,sec_index,**kwargs):
         """Add current injection to a section by its index"""
         self.injection.append(Current_injection(self,sec_index,**kwargs))
     
-    def set_h(self,**h_param):
-        """For setting neuron.h attributes inside this class"""
-        for param,value in h_param.items():
-            setattr(h,param,value)
-    
     def init_v(self):
         """Set all segments initial voltage to vrest"""
         for seg in self.segments:
-            seg.v = self.vrest
+            seg.v = self._vrest
