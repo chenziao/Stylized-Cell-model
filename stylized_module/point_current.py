@@ -11,8 +11,8 @@ class Point_current(object):
         """
         self.cell = cell
         self.sec_index = sec_index
-        self.pp_obj = None
-        self.rec_vec = None
+        self.pp_obj = None  # point process object
+        self.rec_vec = None  # vector for recording
     
     def setup(self,record=None):
         pass
