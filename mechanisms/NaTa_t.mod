@@ -64,7 +64,7 @@ PROCEDURE rates(){
     }
 		mAlpha = (0.182 * (v- -38))/(1-(exp(-(v- -38)/6)))
 		mBeta  = (0.124 * (-v -38))/(1-(exp(-(-v -38)/6)))
-		mTau = (1/(mAlpha + mBeta))/qt
+		mTau = (1/(mAlpha + mBeta))/qt/5  : /5
 		mInf = mAlpha/(mAlpha + mBeta)
 
     if(v == -66){
