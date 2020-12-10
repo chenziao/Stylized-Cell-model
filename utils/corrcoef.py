@@ -1,3 +1,5 @@
+import numpy as np
+
 def corrcoef(x,y):
     """
     function for calculating correlation coefficient
