@@ -70,11 +70,11 @@ class EcpMod(object):
         self.tr = scale/(4*np.pi*sigma)*tr
     
     def calc_ecp(self):
-        """Calculate ECP after simulation"""
+        """Calculate ECP after simulation. Unit: mV."""
         im = self.im_rec.as_numpy()
         for inj in self.cell.injection:
             im[inj.get_segment_id(),:] -= inj.rec_vec.as_numpy()
-        ecp = np.dot(self.tr,im)
+        ecp = np.dot(self.tr,im) # im unit nA, ecp unit mV
         return ecp
 
 def newposition(translate,rotate,old_position=[0.,0.,0.],move_frame=False):
