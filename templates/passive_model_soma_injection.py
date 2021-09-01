@@ -88,7 +88,7 @@ class Simulation(object):
         return param
     
     def set_loc_param(self,loc_param):
-        """Setup location parameters. loc_param ncell-by-5 array"""
+        """Setup location parameters. loc_param ncell-by-6 array"""
         loc_param = self.pack_parameters(loc_param,1,"loc_param")
         self.loc_param = [(loc_param[i,:3],loc_param[i,3:]) for i in range(self.ncell)]
     
