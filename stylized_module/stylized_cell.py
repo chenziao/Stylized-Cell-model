@@ -7,16 +7,18 @@ from stylized_module.current_injection import Current_injection
 h.load_file('stdrun.hoc')
 
 class Stylized_Cell(object):
-    def __init__(self,geometry=None,dL=30,vrest=-70.0):
+    def __init__(self,geometry=None,dL=30,vrest=-70.0,nbranch=4):
         """
         Initialize cell model
         geometry: pandas dataframe of cell morphology properties
         dL: maximum segment length
         vrest: reversal potential of leak channel for all segments
+        nbranch: number of branches of each non axial section
         """
         self._h = h
         self._dL = dL
         self._vrest = vrest
+        self._nbranch = max(nbranch,2)
         self._nsec = 0
         self._nseg = 0
         self.all = []  # list of all sections
@@ -50,36 +52,37 @@ class Stylized_Cell(object):
             return None
         self._nsec = 0
         self.all = []
+        rot = 2*math.pi/self._nbranch
         for id,sec in self.geometry.iterrows():
-            axial = sec['axial']
-            L = sec['L']
-            R = sec['R']
-            ang = sec['ang']
-            start_idx = self._nsec
-            section = self.add_section(name=sec['name'],diam=2*R)
+            start_idx = self._nsec 
             if id==0:
-                R0 = R
-                nseg = 1
-                self.soma = section
+                R0 = sec['R']
                 pt0 = [0.,-2*R0,0.]
                 pt1 = [0.,0.,0.]
+                self.soma = self.add_section(name=sec['name'],diam=2*R0)
+                self.set_location(self.soma,pt0,pt1,1)
             else:
+                L = sec['L']
+                R = sec['R']
+                ang = sec['ang']
                 nseg = math.ceil(L/self._dL)
                 pid = self.sec_id_lookup[sec['pid']][0]
                 psec = self.all[pid]
                 pt0 = [psec.x3d(1),psec.y3d(1),psec.z3d(1)]
-                pt1 = [0.,L*math.sin(ang),0.]
-                if not axial:
-                    pt1[0] = L*math.cos(ang)
-                for i in range(3):
-                    pt1[i] += pt0[i]
-                section.connect(psec(1),0)
-            self.set_location(section,pt0,pt1,nseg)
-            if not axial:
-                section = self.add_section(name=sec['name'],diam=2*R)
-                section.connect(psec(1),0)
-                pt1[0] = -pt1[0]
-                self.set_location(section,pt0,pt1,nseg)
+                if sec['axial']:
+                    nbranch = 1
+                    X = 0
+                    pt1[1] = pt0[1]+L
+                else:
+                    nbranch = self._nbranch
+                    X = L*math.cos(ang)
+                    pt1[1] = pt0[1]+L*math.sin(ang)
+                for i in range(nbranch):
+                    pt1[0] = pt0[0]+X*math.cos(i*rot)
+                    pt1[2] = pt0[2]+X*math.sin(i*rot)
+                    section = self.add_section(name=sec['name'],diam=2*R)
+                    section.connect(psec(1),0)
+                    self.set_location(section,pt0,pt1,nseg)
             self.sec_id_lookup[id] = list(range(start_idx,self._nsec))
         self.set_location(self.soma,[0.,-R0,0.],[0.,R0,0.],1)
         self.store_segments()
