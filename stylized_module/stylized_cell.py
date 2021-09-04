@@ -21,6 +21,7 @@ class Stylized_Cell(object):
         self._nseg = 0
         self.all = []  # list of all sections
         self.segments = []  # list of all segments
+        self.sec_id_lookup = {} # dictionary from section type id to section index
         self.sec_id_in_seg = []
         self.seg_coords = {}
         self.injection = []
@@ -49,15 +50,14 @@ class Stylized_Cell(object):
             return None
         self._nsec = 0
         self.all = []
-        sec_index = [0]*len(self.geometry.index)
-        for j,sec in self.geometry.iterrows():
+        for id,sec in self.geometry.iterrows():
             axial = sec['axial']
             L = sec['L']
             R = sec['R']
             ang = sec['ang']
-            sec_index[j] = self._nsec
+            start_idx = self._nsec
             section = self.add_section(name=sec['name'],diam=2*R)
-            if j==0:
+            if id==0:
                 R0 = R
                 nseg = 1
                 self.soma = section
@@ -65,7 +65,7 @@ class Stylized_Cell(object):
                 pt1 = [0.,0.,0.]
             else:
                 nseg = math.ceil(L/self._dL)
-                pid = sec_index[sec['pid']]
+                pid = self.sec_id_lookup[sec['pid']][0]
                 psec = self.all[pid]
                 pt0 = [psec.x3d(1),psec.y3d(1),psec.z3d(1)]
                 pt1 = [0.,L*math.sin(ang),0.]
@@ -80,6 +80,7 @@ class Stylized_Cell(object):
                 section.connect(psec(1),0)
                 pt1[0] = -pt1[0]
                 self.set_location(section,pt0,pt1,nseg)
+            self.sec_id_lookup[id] = list(range(start_idx,self._nsec))
         self.set_location(self.soma,[0.,-R0,0.],[0.,R0,0.],1)
         self.store_segments()
     
@@ -129,16 +130,20 @@ class Stylized_Cell(object):
         self.seg_coords['r'] = r  # radius
     
     def get_sec_by_id(self,index=None):
-        """Get list of section objects by indices in the section list"""
-        if not isinstance(index, (list,tuple,np.ndarray)):
-            index = [index]
-        return [self.all[i] for i in index]
+        """Get section(s) objects by index(indices) in the section list"""
+        if not hasattr(index,'__len__'):
+            sec = self.all[index]
+        else:
+            sec = [self.all[i] for i in index]
+        return sec
     
     def get_seg_by_id(self,index=None):
-        """Get list of segment objects by indices in the segment list"""
-        if not isinstance(index, (list,tuple,np.ndarray)):
-            index = [index]
-        return [self.segments[i] for i in index]
+        """Get segment(s) objects by index(indices) in the segment list"""
+        if not hasattr(index,'__len__'):
+            seg = self.segments[index]
+        else:
+            seg = [self.segments[i] for i in index]
+        return seg
     
     def set_channels(self):
         """Abstract method for setting biophysical properties, inserting channels"""
